@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
+
 
 load_dotenv()
 
@@ -31,3 +33,13 @@ def format_docs(docs):
 def answer(question, store, k=4):
     docs = store.similarity_search(question, k=k)
     return chain.invoke({"context": format_docs(docs), "question": question})
+
+def build_rag_chain(store, k=4):
+    retriever = store.as_retriever(search_kwargs={"k": k})
+    rag_chain = (
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | PROMPT
+        | llm
+        | StrOutputParser()
+    )
+    return rag_chain

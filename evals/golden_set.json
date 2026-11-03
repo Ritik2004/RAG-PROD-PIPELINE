@@ -1,0 +1,92 @@
+[
+  {
+    "question": "How many attention heads does the Transformer use?",
+    "expected_answer": "8 parallel attention heads",
+    "expected_source": "attention_is_all_you_need.pdf",
+    "expected_pages": [5]
+  },
+  {
+    "question": "What BLEU score does the Transformer achieve on WMT 2014 English-to-German translation?",
+    "expected_answer": "28.4 BLEU",
+    "expected_source": "attention_is_all_you_need.pdf",
+    "expected_pages": [1, 8]
+  },
+  {
+    "question": "Which optimizer was used to train the Transformer?",
+    "expected_answer": "Adam, with beta1 = 0.9, beta2 = 0.98 and epsilon = 1e-9",
+    "expected_source": "attention_is_all_you_need.pdf",
+    "expected_pages": [7]
+  },
+  {
+    "question": "What label smoothing value was used during Transformer training?",
+    "expected_answer": "0.1",
+    "expected_source": "attention_is_all_you_need.pdf",
+    "expected_pages": [8]
+  },
+  {
+    "question": "What is the output dimension d_model of the Transformer layers?",
+    "expected_answer": "512",
+    "expected_source": "attention_is_all_you_need.pdf",
+    "expected_pages": [3, 5]
+  },
+  {
+    "question": "What GPUs was the Transformer trained on?",
+    "expected_answer": "Eight NVIDIA P100 GPUs",
+    "expected_source": "attention_is_all_you_need.pdf",
+    "expected_pages": [2, 7]
+  },
+  {
+    "question": "How were sentences encoded in the English-German translation dataset?",
+    "expected_answer": "Byte-pair encoding with a shared vocabulary of about 37000 tokens",
+    "expected_source": "attention_is_all_you_need.pdf",
+    "expected_pages": [7]
+  },
+  {
+    "question": "Which model does RAG use as its generator?",
+    "expected_answer": "BART-large, a pre-trained seq2seq transformer with 400M parameters",
+    "expected_source": "rag_paper.pdf",
+    "expected_pages": [3]
+  },
+  {
+    "question": "How many documents are in RAG's Wikipedia index?",
+    "expected_answer": "21 million 100-word chunks from the December 2018 Wikipedia dump",
+    "expected_source": "rag_paper.pdf",
+    "expected_pages": [4, 19]
+  },
+  {
+    "question": "What search method does RAG use to find the top-K documents?",
+    "expected_answer": "Maximum Inner Product Search (MIPS)",
+    "expected_source": "rag_paper.pdf",
+    "expected_pages": [2, 3]
+  },
+  {
+    "question": "How many retrieved documents are used for RAG-Token models in open-domain QA?",
+    "expected_answer": "15 retrieved documents",
+    "expected_source": "rag_paper.pdf",
+    "expected_pages": [17]
+  },
+  {
+    "question": "In human evaluation of Jeopardy question generation, how often was RAG judged more factual than BART?",
+    "expected_answer": "42.7% of the time (BART better only 7.1%)",
+    "expected_source": "rag_paper.pdf",
+    "expected_pages": [8]
+  },
+  {
+    "question": "Which large language model is mainly used in the ReAct paper?",
+    "expected_answer": "PaLM-540B, prompted with few-shot examples",
+    "expected_source": "react_agents.pdf",
+    "expected_pages": [3]
+  },
+  {
+    "question": "What actions does ReAct's Wikipedia API support?",
+    "expected_answer": "search[entity], lookup[string] and finish[answer]",
+    "expected_source": "react_agents.pdf",
+    "expected_pages": [4]
+  },
+  {
+    "question": "By how much does ReAct outperform imitation and reinforcement learning methods on ALFWorld and WebShop?",
+    "expected_answer": "An absolute success rate of 34% on ALFWorld and 10% on WebShop",
+    "expected_source": "react_agents.pdf",
+    "expected_pages": [1]
+  }
+]

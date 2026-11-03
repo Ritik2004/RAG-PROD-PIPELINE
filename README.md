@@ -218,10 +218,13 @@ python -m tests.test_chain      # ask questions, get cited answers
 - [x] Chunk with overlap at natural boundaries
 - [x] Embed + store in Qdrant
 - [x] Answer with citations + "I don't know" for out-of-scope questions
-- [ ] Retriever inside a single LCEL chain
-- [ ] Hybrid search (BM25 + vector, RRF)
+- [x] Retriever inside a single LCEL chain
+- [x] Retrieval eval: 15-question golden set, **baseline hit rate @ 4 = 47%**
+- [x] Hybrid search (BM25 + vector, RRF): **hit rate 47% → 60%**
 - [ ] Cross-encoder reranking
-- [ ] Citation enforcement (structured output + validation)
+- [ ] Citation enforcement: structured `{claim, chunk_id}` output, then verify that each cited chunk actually supports its claim
+- [ ] File hash at ingest: re-index only changed files, flag stale citations
+- [ ] Conflicting sources: flag disagreements and cite both; prefer newer docs via date/version metadata
 - [ ] Evaluation set + Ragas metrics
 - [ ] CI quality gate (GitHub Actions)
 - [ ] Langfuse tracing: latency p50/p95, cost per request

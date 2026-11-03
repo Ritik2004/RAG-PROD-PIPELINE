@@ -151,11 +151,81 @@ and get back an answer that cites its sources like `[rag_paper.pdf, page 9]`.
 
 **Test:** `python -m tests.test_chain` (needs `GROQ_API_KEY`)
 
+### Step 5: One chain for the whole pipeline
+
+**What:** Moved retrieval inside the LangChain chain, so a single call does everything:
+`question → retriever → format chunks → prompt → LLM → answer`.
+
+**Why:** Each step is now a swappable block. In the next steps the basic retriever gets replaced
+by a better one (hybrid search, then reranking) **without changing any other code**.
+
+**How:** `store.as_retriever(k=4)` turns the vector store into a retriever. A small dict
+`{"context": retriever | format_docs, "question": RunnablePassthrough()}` sends the question down
+two paths at once (one fetches and formats the chunks, the other passes the question through),
+and the result fills the prompt.
+
+**Result:** same answer as before: "8 attention heads [attention_is_all_you_need.pdf, page 5]"
+
+**Code:** `build_rag_chain` in [app/generate/chain.py](app/generate/chain.py)
+
+**Test:** `python -m tests.test_rag_chain`
+
+### Step 6: Measure retrieval quality (the baseline)
+
+**What:** A small "exam" for the search step. [evals/golden_set.json](evals/golden_set.json) has 15 questions
+across the 3 PDFs. For each one, the exact file and page holding the answer was checked by hand.
+The script asks the retriever each question and checks whether the right page is in the top 4 chunks.
+
+**Why:** If search doesn't find the right chunk, the LLM can't give the right answer. So retrieval is
+tested on its own, without the LLM. This number is the **baseline**: every later improvement
+(hybrid search, reranking) is measured against it, so "better" means a real number, not a feeling.
+
+**Result:** **hit rate @ 4 = 7/15 (47%)**
+
+| What we saw | What it suggests |
+|---|---|
+| Every miss found the **right file** but the **wrong page** | Search gets the topic, but not the precise passage |
+| Misses were often on exact terms: "Adam", "BART-large", "21M documents", "MIPS", "PaLM-540B" | Meaning-based search is weak on exact names and numbers → **keyword search (BM25)** should help |
+| Some answers sit in tables or number-heavy text | A **reranker** that reads the question and chunk together should pick the precise chunk |
+
+**Code:** [evals/retrieval_eval.py](evals/retrieval_eval.py)
+
+**Run:** `python -m evals.retrieval_eval`
+
+### Step 7: Hybrid search (keyword + meaning)
+
+**What:** Run two searches on every question and merge the results:
+- **Vector search**: finds chunks with similar *meaning*
+- **BM25 keyword search**: finds chunks containing the *exact words* (names, numbers, acronyms)
+
+The two ranked lists are merged with **Reciprocal Rank Fusion (RRF)**: each list gives a chunk points
+based on its position (`1 / (60 + rank)`), the points are added, and the chunks are re-sorted.
+Chunks that **both** searches rank highly end up at the top.
+
+**Why:** Step 6 showed that vector search found the right paper but missed exact terms like "Adam" and
+"PaLM-540B". Keyword search is good at exactly those, but bad at synonyms. Together they cover each other's gaps.
+
+**Result (same 15-question eval, top 4 chunks):**
+
+| Retriever | Hit rate |
+|---|---|
+| Vector only (baseline) | 7/15 (47%) |
+| BM25 only | 8/15 (53%) |
+| **Hybrid (BM25 + vector, RRF)** | **9/15 (60%)** |
+
+Hybrid beats both searches alone. The remaining misses are mostly in the RAG paper, where common words
+like "RAG" and "documents" appear on almost every page, so neither search can pick the precise page.
+That's the job of the next step, reranking.
+
+**Code:** [app/retrieve/hybrid.py](app/retrieve/hybrid.py)
+
+**Run:** `python -m evals.retrieval_eval` (set `MODE` to `"vector"` or `"hybrid"`)
+
 ---
 
 ## Coming next
 
-- [ ] Hybrid search (keyword + meaning) and reranking
+- [ ] Reranking
 - [ ] Evaluations (measure answer quality) + a CI check that blocks bad changes
 - [ ] Tracing and monitoring (latency, cost, quality)
 - [ ] Guardrails, API, UI, Docker, deployment
