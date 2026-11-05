@@ -1,0 +1,38 @@
+[
+  {
+    "date": "2026-11-05T10:03:58",
+    "mode": "vector",
+    "k": 4,
+    "candidates": null,
+    "hits": 7,
+    "total": 15,
+    "seconds_per_question": 0.01
+  },
+  {
+    "date": "2026-11-05T10:04:31",
+    "mode": "hybrid",
+    "k": 4,
+    "candidates": null,
+    "hits": 9,
+    "total": 15,
+    "seconds_per_question": 0.01
+  },
+  {
+    "date": "2026-11-05T10:05:06",
+    "mode": "rerank",
+    "k": 4,
+    "candidates": 10,
+    "hits": 14,
+    "total": 15,
+    "seconds_per_question": 0.16
+  },
+  {
+    "date": "2026-11-05T10:05:27",
+    "mode": "rerank",
+    "k": 4,
+    "candidates": 20,
+    "hits": 15,
+    "total": 15,
+    "seconds_per_question": 0.3
+  }
+]

@@ -221,11 +221,59 @@ That's the job of the next step, reranking.
 
 **Run:** `python -m evals.retrieval_eval` (set `MODE` to `"vector"` or `"hybrid"`)
 
+### Step 8: Reranking (pick the most precise chunks)
+
+**What:** Hybrid search now fetches a larger set of **candidates** (10 or 20). A **cross-encoder** model
+(`cross-encoder/ms-marco-MiniLM-L-6-v2`) then reads the question and each candidate **together**, scores
+how well that chunk answers the question, and keeps the best 4.
+
+**Why:** Search compares the question and the chunks separately, which is fast but rough. That's why
+it often found the right paper but the wrong page. A cross-encoder is much more accurate, but too slow
+to run on every chunk, so it runs only on the candidates. **Search for recall, rerank for precision.**
+
+**Result (same 15-question eval, top 4 chunks):**
+
+| Retriever | Hit rate | Time per question |
+|---|---|---|
+| Vector only | 7/15 (47%) | 0.01 s |
+| Hybrid | 9/15 (60%) | 0.01 s |
+| Hybrid + reranker (10 candidates) | 14/15 (93%) | 0.16 s |
+| **Hybrid + reranker (20 candidates)** | **15/15 (100%)** | 0.30 s |
+
+Doubling the candidates roughly doubled the time, because the reranker runs once per candidate.
+0.3 s is still small next to the LLM call (1–2 s), so 20 candidates is the setting used.
+
+**Caveat:** 15 mostly keyword-heavy questions is an easy test, and 100% doesn't mean retrieval is perfect.
+A harder test set (reworded and unanswerable questions) is planned.
+
+Every eval run is saved to [evals/results.json](evals/results.json) (date, mode, candidates, score, time),
+which builds a history of experiments.
+
+**Code:** [app/retrieve/rerank.py](app/retrieve/rerank.py)
+
+---
+
+### Step 9: A web API (in progress)
+
+**What:** A **FastAPI** server so the RAG can be used over HTTP (by a web UI, or anything else), not just from the terminal.
+
+**Done so far:**
+- `GET /health` returns `{"status": "ok"}`, a simple "is the server up?" check
+- **Pydantic models** describe the `/ask` request and response:
+  `AskRequest {question}` → `AskResponse {answer, sources: [{file, page, text}], seconds}`.
+  Bad input (missing or wrong-type `question`) is rejected automatically with a clear **422** error.
+- `POST /ask` currently returns a placeholder answer, to get the shapes right before connecting the real pipeline
+
+**Code:** [app/api/main.py](app/api/main.py), [app/api/schemas.py](app/api/schemas.py)
+
+**Run:** `uvicorn app.api.main:app --reload`, then open http://localhost:8000/docs
+
 ---
 
 ## Coming next
 
-- [ ] Reranking
+- [ ] Connect `/ask` to the real pipeline (load models once at startup)
+- [ ] React web app: Ask tab + Experiments dashboard
 - [ ] Evaluations (measure answer quality) + a CI check that blocks bad changes
 - [ ] Tracing and monitoring (latency, cost, quality)
 - [ ] Guardrails, API, UI, Docker, deployment

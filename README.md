@@ -153,7 +153,10 @@ flowchart LR
 | Embeddings | `sentence-transformers/all-MiniLM-L6-v2` (local, free, 384 dims) |
 | Vector database | Qdrant (local mode) |
 | LLM | Groq, `openai/gpt-oss-20b` |
-| *Planned* | BM25, cross-encoder reranker, Ragas, Langfuse, FastAPI, Streamlit, Docker, GitHub Actions |
+| Hybrid search | BM25 (`rank_bm25`) + vector, merged with RRF (`EnsembleRetriever`) |
+| Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
+| API | FastAPI + Pydantic |
+| *Planned* | React, Ragas, Langfuse, Docker, GitHub Actions |
 
 ---
 
@@ -221,7 +224,10 @@ python -m tests.test_chain      # ask questions, get cited answers
 - [x] Retriever inside a single LCEL chain
 - [x] Retrieval eval: 15-question golden set, **baseline hit rate @ 4 = 47%**
 - [x] Hybrid search (BM25 + vector, RRF): **hit rate 47% → 60%**
-- [ ] Cross-encoder reranking
+- [x] Cross-encoder reranking: **hit rate 60% → 100%** (20 candidates, 0.3 s/question)
+- [x] FastAPI: `/health`, Pydantic request/response models
+- [ ] `/ask` connected to the real pipeline
+- [ ] React UI: Ask tab + Experiments dashboard
 - [ ] Citation enforcement: structured `{claim, chunk_id}` output, then verify that each cited chunk actually supports its claim
 - [ ] File hash at ingest: re-index only changed files, flag stale citations
 - [ ] Conflicting sources: flag disagreements and cite both; prefer newer docs via date/version metadata
